@@ -115,6 +115,139 @@ For every V3 result, preserve:
 
 ---
 
+# ⏳ Phase 8 — June–August 2026: Navokoj Production Telemetry
+
+This section summarizes completed Nitro CPU runs recorded by the Navokoj production solve ledger. It covers **944 completed runs** from **2026-06-19 05:21 UTC** through **2026-08-08 16:24 UTC**.
+
+The telemetry represents mixed production, benchmark, validation, and test traffic. It is reported separately from the curated benchmark suites above.
+
+## Aggregate Nitro CPU Metrics
+
+| Metric | Value |
+|---|---:|
+| Completed CPU runs | **944** |
+| Median solve time | **0.035 s** |
+| P90 solve time | **2.288 s** |
+| P95 solve time | **4.274 s** |
+| P99 solve time | **20.464 s** |
+| Perfect-satisfaction runs | **392** |
+| Runs ≥99% satisfaction | **538** |
+| Runs ≥99.9% satisfaction | **447** |
+| Maximum variables | **461,801** |
+| Maximum clauses | **4,000,000** |
+| Maximum observed clause density | **177.85 clauses/variable** |
+| Aggregate processed throughput | **29,255 clauses/solver-second** |
+
+The overall mean satisfaction across all 944 runs is 69.0%. This aggregate includes hundreds of very small validation and stress-test requests. Large-instance subsets have materially higher satisfaction rates.
+
+## Scaling by Clause Count
+
+| Clause range | Runs | Median time | P90 time | Mean satisfaction | ≥99.9% satisfaction | Aggregate throughput |
+|---|---:|---:|---:|---:|---:|---:|
+| <10K | 794 | 0.022 s | 1.288 s | 63.27% | 42.7% | 1,853 clauses/s |
+| 10K–100K | 96 | 0.355 s | 7.354 s | 99.17% | 66.7% | 14,586 clauses/s |
+| 100K–1M | 41 | 0.946 s | 7.656 s | **99.77%** | **80.5%** | **96,308 clauses/s** |
+| 1M+ | 13 | 22.927 s | 81.266 s | **99.914%** | **84.6%** | **34,812 clauses/s** |
+
+For this telemetry set, the largest problem-size bands also have the highest average satisfaction.
+
+The mixed-workload log-log fit between clause count `C` and solve time `T` is:
+
+```text
+T ∝ C^0.321
+```
+
+The corresponding log-log correlation is **0.476**.
+
+This is an empirical production-telemetry fit. It describes the observed workload rather than an asymptotic complexity bound.
+
+## Scaling by Clause Density
+
+Clause density is defined as `clauses / variables`.
+
+| Density band | Runs | Median time | Mean satisfaction | ≥99.9% satisfaction |
+|---|---:|---:|---:|---:|
+| <2 | 334 | 0.0097 s | 38.34% | 28.1% |
+| 2–4 | 181 | 0.061 s | 95.39% | 63.0% |
+| 4–6 | 271 | 0.084 s | 71.74% | 50.2% |
+| 6–10 | 64 | 0.027 s | 97.78% | 35.9% |
+| 10+ | 94 | **0.305 s** | **99.72%** | **85.1%** |
+
+The mixed-workload density fit is:
+
+```text
+T ∝ density^0.674
+```
+
+The log-log correlation between density and runtime is **0.331**. Density alone is therefore a weak predictor of runtime in the recorded Nitro workload.
+
+The correlation between log clause count and satisfaction is **0.599**. The correlation between log density and satisfaction is **0.478**. The correlation between log runtime and satisfaction is only **0.176**.
+
+In this workload, high satisfaction is associated more strongly with instance scale and density than with additional solver time.
+
+## Large Completed Runs
+
+Representative completed Nitro CPU records from the production ledger:
+
+| Variables | Clauses | Density | Satisfaction | Solve time |
+|---:|---:|---:|---:|---:|
+| 200,000 | **4,000,000** | 20.00 | **100%** | **27.700 s** |
+| 100,000 | **4,000,000** | 40.00 | **100%** | **22.927 s** |
+| 32,768 | **2,035,713** | 62.13 | **99.9998%** | **61.714 s** |
+| 100,000 | **2,000,000** | 20.00 | **100%** | **13.678 s** |
+| 461,801 | **1,671,761** | 3.62 | **99.9380%** | **275.019 s** |
+| 391,680 | **1,303,808** | 3.33 | **99.9999%** | **17.186 s** |
+| 340,761 | **1,156,861** | 3.40 | **99.9897%** | **78.697 s** |
+| 184,170 | **1,020,450** | 5.54 | **99.3863%** | **30.906 s** |
+| 50,000 | **1,000,000** | 20.00 | **100%** | **7.700 s** |
+| 229,941 | **832,121** | 3.62 | **100%** | **2.768 s** |
+| 15,625 | **752,505** | 48.16 | **100%** | **1.625 s** |
+| 21,000 | **715,190** | 34.06 | **99.9842%** | **2.375 s** |
+| 142,561 | **550,651** | 3.86 | **100%** | **1.798 s** |
+| 97,536 | **324,224** | 3.32 | **100%** | **0.895 s** |
+
+## Repeated-Shape Runtime Stability
+
+The production ledger contains **46 Nitro CPU shape groups** with at least three completed runs using the same `(variables, clauses, density)` tuple. The most frequently repeated shape appears **171 times**.
+
+Across these repeated groups:
+
+| Metric | Value |
+|---|---:|
+| Repeated shape groups | **46** |
+| Maximum repeats for one shape | **171** |
+| Median runtime coefficient of variation | **18.3%** |
+| Mean runtime coefficient of variation | **41.9%** |
+
+This grouping is based on dimensions and density. The current ledger does not store a canonical CNF input hash, so identical dimensions do not establish byte-identical inputs.
+
+## Production-Telemetry Summary
+
+The production data adds several observations not visible from the earlier curated benchmark tables:
+
+1. Nitro has completed problems ranging from trivial validation requests to **4 million clauses** in the same production path.
+2. The observed runtime dependence on clause count is shallow across the mixed workload, with an empirical exponent of **0.321**.
+3. The **100K–1M clause band** has the highest aggregate throughput at approximately **96K clauses per solver-second**.
+4. The **1M+ clause band** contains 13 completed runs with **99.914% mean satisfaction** and **84.6%** of runs at or above 99.9% satisfaction.
+5. High clause density does not correspond to a sharp runtime wall. The **10+ clauses/variable** group contains 94 runs with **99.72% mean satisfaction** and a **0.305 s median** solve time.
+6. Runtime is relatively stable across repeated problem shapes, with a **18.3% median coefficient of variation** across 46 repeated-shape groups.
+7. The production ledger includes multiple million-clause perfect or near-perfect solutions, including 4M-clause runs at 100% satisfaction and a 1.30M-clause run at 99.9999% satisfaction.
+
+## Telemetry Reproducibility Gap
+
+The production ledger records request ID, solver, hardware, variable count, clause count, satisfaction, solve time, compute time, status, and basic request metadata. It does not currently persist benchmark family, dataset name, generator parameters, or a canonical input hash for every solve.
+
+Future production runs intended for benchmark publication should store:
+
+* benchmark family and instance name;
+* generator and seed, when generated;
+* canonical CNF/WCNF hash;
+* solver commit or binary version;
+* host/hardware metadata;
+* independent assignment verification result.
+
+---
+
 # ⏳ Phase 1 — January 15, 2026: Initial Release (v1.0)
 
 > Commit `8c6fc20` — *"Initial release of NitroSAT"*
@@ -473,7 +606,7 @@ The **Pitfall formula** (Buss & Nordström) is specifically engineered to expose
 ### "Phase-2" Rescue (Glassy Plateau Recovery)
 
 | Instance | Plateau Sat% | Final Sat% | Rescue Delta | Mechanism |
-|----------|--------------|------------|--------------|-----------|
+|----------|--------------|------------|--------------|
 | `phase_200k` | ~96% | 99.20% | +3.2% | Topological Repair + BAHA |
 | `ramsey.cnf` | ~95% | 99.17% | +4.17% | β₁ Explosion Resolution |
 | `pit.cnf` | ~96% | 100.0% | +4.0% | Stage 2/3 Adelic Saturation |
@@ -710,5 +843,5 @@ The **Pitfall formula** (Buss & Nordström) is specifically engineered to expose
 
 ---
 
-*Last updated: April 8, 2026*
+*Last updated: August 12, 2026*
 *Repository: https://github.com/sethuiyer/NitroSAT*
