@@ -2,6 +2,7 @@
 
 > **5,000+ CNF instances tested** · **77% perfect SATISFIED rate** · **99.7% median satisfaction**
 > Assignments dataset: [HuggingFace](https://huggingface.co/datasets/sethuiyer/navokoj_sat_2024)
+> Public evidence bundle: [ShunyaBar Evidence v1](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1)
 
 This document consolidates **every** benchmark table from `README.md`, `BENCHMARKS.md`, `RESULTS.md`, `CHANGELOG.md`, and `full_benchmark_results.csv` — ordered chronologically by git commit date.
 
@@ -14,6 +15,27 @@ This document consolidates **every** benchmark table from `README.md`, `BENCHMAR
 | [full_benchmark_results.csv](full_benchmark_results.csv) | 360 | Raw telemetry for 360 CNF seeds |
 | [../README.md](../README.md) | 260 | Hero table, v2 timetable breakthrough |
 | [../CHANGELOG.md](../CHANGELOG.md) | 280 | v1 vs v2 algorithmic comparison |
+
+## Public Evidence Bundle
+
+The benchmark tables in this repository are paired with a public artifact layer at [**ShunyaBar Evidence v1**](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1). The bucket is the preferred location for large inputs, raw outputs, generated corpora, verifier material, scaling CSVs, plots, and sync-time file hashes that do not belong in normal Git history.
+
+As of August 2026, the public bucket is approximately **9.38 GB** across **8,737 files**. NitroSAT-specific material includes:
+
+| Evidence path | Contents |
+|---|---|
+| [`nitrosat/cnfs/`](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1/tree/nitrosat/cnfs) | Promoted public CNF corpus used for stress, regression, and evidence work; 5,342 publishable CNFs were recorded in the evidence index |
+| [`nitrosat/nitrosatv3_results.csv`](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1/tree/nitrosat/nitrosatv3_results.csv) | Bulk V3 heuristic telemetry over the promoted corpus |
+| [`nitrosat/scaling_fit.csv`](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1/tree/nitrosat/scaling_fit.csv) | Log-log scaling coefficients associated with the V3 telemetry |
+| [`nitrosat/plots/`](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1/tree/nitrosat/plots) | Size/time, satisfaction/time, scaling, and family plots derived from the CSV telemetry |
+| [`nitrosat/results/`](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1/tree/nitrosat/results) | Large-instance traces and result artifacts |
+| [`nitrosat/logic-circuit-suite/`](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1/tree/nitrosat/logic-circuit-suite) | Deterministic gate-level CNFs, raw V3 outputs, assignments, exact-mode material, and independent verifier records |
+| [`nitrosat/docs/`](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1/tree/nitrosat/docs) | CNFgen generation and result documentation |
+| [`MANIFEST.sha256`](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1/tree/MANIFEST.sha256) | Sync-time hashes for files in the evidence bundle |
+
+The evidence bundle uses a stronger claim format than a benchmark table alone. For publication-grade claims, pair the numerical result with the **input hash, solver commit or binary, command, host environment, raw output, and independent verifier output** when available.
+
+The open-source **NitroSAT V1/V2/V3** lineage and the production API engine named `nitro` are separate evidence tracks. This document is primarily the benchmark heritage for the open-source NitroSAT line; production telemetry is explicitly labeled where included.
 
 ---
 
@@ -97,9 +119,11 @@ cost is heuristic and is not an optimality certificate.
 
 Local stress testing documented in the V3 usage guide reports a
 37M-clause enterprise-timetabling-style stream with **9.62 MiB** peak bounded
-solver allocation under default settings. Treat this as a local streaming
-memory demonstration until the full artifact pack contains command, commit,
-input hash, raw output, host, and verifier output.
+solver allocation under default settings.
+
+A stronger artifact-backed V3 result is now present in the public evidence bundle: an enterprise-timetabling CNF with **116,161,300 / 116,161,300 clauses satisfied in 4m48s**, with **10.7 MiB peak RSS**, using the V3 streaming architecture without a full in-memory clause database. See [`nitrosat/results/enterprise_timetabling_80M.md`](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1/tree/nitrosat/results/enterprise_timetabling_80M.md).
+
+The public V3 corpus campaign also includes [`nitrosat/nitrosatv3_results.csv`](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1/tree/nitrosat/nitrosatv3_results.csv), [`nitrosat/scaling_fit.csv`](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1/tree/nitrosat/scaling_fit.csv), and derived plots. The evidence bundle reports a global descriptive fit of approximately `wall ∝ clauses^1.00` with `R² ≈ 0.80` for that V3 corpus sweep, plus nine per-family fits with slopes in roughly the `0.85–1.15` range and `R² ≥ 0.85`. These V3 corpus fits are separate from the production `nitro` telemetry in Phase 8 below.
 
 ## V3 Evidence Rules
 
@@ -112,6 +136,8 @@ For every V3 result, preserve:
 * hard vs soft result for WCNF;
 * independent assignment/proof verification status;
 * whether the instance is planted, generated, benchmark-suite, or production.
+
+For public evidence, prefer the artifact chain in [ShunyaBar Evidence v1](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1) and join figures back to their source CSVs rather than citing plot images alone.
 
 ---
 
@@ -246,6 +272,8 @@ Future production runs intended for benchmark publication should store:
 * host/hardware metadata;
 * independent assignment verification result.
 
+The [ShunyaBar Evidence v1](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1) bucket is the public destination for promoted receipts. Its existing NitroSAT evidence layer already includes CNFs, V3 bulk telemetry, scaling coefficients, large-instance traces, logic-circuit verification artifacts, and `MANIFEST.sha256`. Production telemetry rows should be promoted there when the missing input/provenance fields are available.
+
 ---
 
 # ⏳ Phase 1 — January 15, 2026: Initial Release (v1.0)
@@ -257,7 +285,7 @@ The `full_benchmark_results.csv` (360 instances) was introduced here with the co
 ### Category Aggregates (C Engine)
 
 | Category | Problem Type | C Avg. Satisfaction | Lua Avg. Satisfaction |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | `rand3sat` | Random 3-CNF | 99.59% | 99.86% |
 | `rand4sat` | Random 4-CNF | 99.86% | *Not tested* |
 | `rand5sat` | Random 5-CNF | 99.86% | *Not tested* |
@@ -839,7 +867,7 @@ The **Pitfall formula** (Buss & Nordström) is specifically engineered to expose
 
 **Compiler:** `gcc -O3 -lm` · **No external dependencies** · **Single-threaded**
 
-**Reproducibility:** [HuggingFace Dataset](https://huggingface.co/datasets/sethuiyer/navokoj_sat_2024) · [timetable_output.json](../timetable_output.json)
+**Reproducibility:** [HuggingFace Dataset](https://huggingface.co/datasets/sethuiyer/navokoj_sat_2024) · [ShunyaBar Evidence v1](https://huggingface.co/buckets/sethuiyer/shunyabar-evidence-v1) · [timetable_output.json](../timetable_output.json)
 
 ---
 
